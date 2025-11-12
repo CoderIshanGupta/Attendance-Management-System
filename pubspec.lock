@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: async
-      sha256: d2872f9c19731c2e5f10444b14686eb7cc85c76274bd6c16e1816bff9a3bab63
+      sha256: "758e6d74e971c3e5aceb4110bfd6698efc7f501675bcfe0c775459a8140750eb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.0"
+    version: "2.13.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -61,18 +61,18 @@ packages:
     dependency: transitive
     description:
       name: fake_async
-      sha256: "6a95e56b2449df2273fd8c45a662d6947ce1ebb7aafe80e550a3f68297f3cacc"
+      sha256: "5368f224a74523e8d2e7399ea1638b37aecfca824a3cc4dfdf77bf1fa905ac44"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.3"
   fl_chart:
     dependency: "direct main"
     description:
       name: fl_chart
-      sha256: "5276944c6ffc975ae796569a826c38a62d2abcf264e26b88fa6f482e107f4237"
+      sha256: d3f82f4a38e33ba23d05a08ff304d7d8b22d2a59a5503f20bd802966e915db89
       url: "https://pub.dev"
     source: hosted
-    version: "0.70.2"
+    version: "1.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -82,10 +82,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: "5398f14efa795ffb7a33e9b6a08798b26a180edac4ad7db3f231e40f82ce11e1"
+      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "6.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -100,26 +100,18 @@ packages:
     dependency: "direct main"
     description:
       name: get
-      sha256: e4e7335ede17452b391ed3b2ede016545706c01a02292a6c97619705e7d2a85e
+      sha256: c79eeb4339f1f3deffd9ec912f8a923834bec55f7b49c9e882b8fef2c139d425
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.6"
-  js:
-    dependency: transitive
-    description:
-      name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.7"
+    version: "4.7.2"
   leak_tracker:
     dependency: transitive
     description:
       name: leak_tracker
-      sha256: c35baad643ba394b40aac41080300150a4f08fd0fd6a10378f8f7c6bc161acec
+      sha256: "6bb818ecbdffe216e81182c2f0714a2e62b593f4a4f13098713ff1685dfb6ab0"
       url: "https://pub.dev"
     source: hosted
-    version: "10.0.8"
+    version: "10.0.9"
   leak_tracker_flutter_testing:
     dependency: transitive
     description:
@@ -140,10 +132,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: c35bb79562d980e9a453fc715854e1ed39e24e7d0297a880ef54e17f9874a9d7
+      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.1"
+    version: "6.0.0"
   matcher:
     dependency: transitive
     description:
@@ -168,6 +160,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.16.0"
+  mobile_scanner:
+    dependency: "direct main"
+    description:
+      name: mobile_scanner
+      sha256: "023a71afb4d7cfb5529d0f2636aa8b43db66257905b9486d702085989769c5f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.3"
   path:
     dependency: transitive
     description:
@@ -176,6 +176,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
+  plugin_platform_interface:
+    dependency: transitive
+    description:
+      name: plugin_platform_interface
+      sha256: "4820fbfdb9478b1ebae27888254d445073732dae3d6ea81f0b7e06d5dedc3f02"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.8"
   qr:
     dependency: transitive
     description:
@@ -184,22 +192,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  qr_code_scanner:
-    dependency: "direct main"
-    description:
-      name: qr_code_scanner
-      sha256: f23b68d893505a424f0bd2e324ebea71ed88465d572d26bb8d2e78a4749591fd
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   qr_flutter:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: d5e7206396105d643113618290bbcc755d05f492
-      url: "https://github.com/theyakka/qr.flutter.git"
-    source: git
+      name: qr_flutter
+      sha256: "5095f0fc6e3f71d08adef8feccc8cea4f12eec18a2e31c2e8d82cb6019f4b097"
+      url: "https://pub.dev"
+    source: hosted
     version: "4.1.0"
   sky_engine:
     dependency: transitive
@@ -266,10 +265,18 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "0968250880a6c5fe7edc067ed0a13d4bae1577fe2771dcf3010d52c4a9d3ca14"
+      sha256: ddfa8d30d89985b96407efce8acbdd124701f96741f2d981ca860662f1c0dc02
       url: "https://pub.dev"
     source: hosted
-    version: "14.3.1"
+    version: "15.0.0"
+  web:
+    dependency: transitive
+    description:
+      name: web
+      sha256: "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
+  dart: ">=3.8.0 <4.0.0"
+  flutter: ">=3.29.0"
