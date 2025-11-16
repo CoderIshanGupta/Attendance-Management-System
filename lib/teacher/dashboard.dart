@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../app/routes.dart';
 import '../models/role.dart';
 import '../mock/store.dart';
 import '../models/session.dart';
+import '../shared/profile_store.dart';
 import 'teacher_drawer.dart';
 
 class TeacherDashboard extends StatefulWidget {
@@ -16,7 +18,15 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard> {
   final store = DataStore.I;
 
+  final TextEditingController _search = TextEditingController();
+  String _q = '';
+
   Future<void> _refresh() async => setState(() {});
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   void _logout() {
     RoleStore.isLoggedIn = false;
@@ -29,8 +39,16 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     final now = DateTime.now();
     final dateStr = '${_weekday(now.weekday)}, ${now.day}/${now.month}/${now.year}';
     final isWide = MediaQuery.of(context).size.width >= 700;
-    final next = store.nextClass();
-    final leftToday = store.classesLeftToday();
+    final next = store.nextClassDynamic();
+    final leftToday = store.classesLeftTodayDynamic();
+
+    // Filter subjects/sections
+    final q = _q.trim().toLowerCase();
+    final filteredEntries = store.assignments.entries.where((e) {
+      if (q.isEmpty) return true;
+      if (e.key.toLowerCase().contains(q)) return true;
+      return e.value.any((sec) => sec.toLowerCase().contains(q));
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -75,33 +93,103 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _WelcomeHeader(
-                            dateStr: dateStr,
-                            name: store.teacherName,
+                          // Reactive profile name
+                          ValueListenableBuilder<Profile>(
+                            valueListenable: ProfileStore.I.profile,
+                            builder: (context, p, _) {
+                              return _WelcomeHeader(
+                                dateStr: dateStr,
+                                name: p.name,
+                              );
+                            },
                           ),
                           const SizedBox(height: 16),
+
+                          // Quick stats
                           _QuickStatsRow(
                             isWide: isWide,
                             subjects: store.assignmentsCount(),
                             sections: store.sectionsCount(),
                             leftToday: leftToday,
                           ),
+
+                          // Next up
                           if (next != null) ...[
                             const SizedBox(height: 16),
                             _NextUpCard(
                               subject: next.subject,
                               section: next.section,
                               time: _hhmm(next.start),
+                              onStart: () async {
+                                HapticFeedback.mediumImpact();
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Starting session: ${next.subject} — ${next.section}'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                                final s = store.startOrResumeSession(next.subject, next.section);
+                                await Get.toNamed(
+                                  AppRoutes.teacherLiveQr,
+                                  arguments: {
+                                    'subject': next.subject,
+                                    'section': next.section,
+                                    'sessionId': s.id,
+                                  },
+                                );
+                                setState(() {}); // refresh Left Today + Next up
+                              },
                             ),
                           ],
+
                           const SizedBox(height: 16),
-                          ...store.assignments.entries.map(
-                            (e) => _SubjectCard(
-                              subject: e.key,
-                              sections: e.value,
-                              onChanged: _refresh,
+
+                          // Search box
+                          TextField(
+                            controller: _search,
+                            onChanged: (v) => setState(() => _q = v),
+                            decoration: InputDecoration(
+                              hintText: 'Search subjects/sections',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _q.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        _search.clear();
+                                        setState(() => _q = '');
+                                      },
+                                    ),
+                              border: const OutlineInputBorder(),
                             ),
                           ),
+
+                          const SizedBox(height: 12),
+
+                          // Subject cards (filtered)
+                          if (filteredEntries.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              alignment: Alignment.center,
+                              child: Column(
+                                children: const [
+                                  Icon(Icons.search_off, size: 64, color: Colors.grey),
+                                  SizedBox(height: 8),
+                                  Text('No matches found', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 4),
+                                  Text('Try a different subject or section name', style: TextStyle(color: Colors.black54)),
+                                ],
+                              ),
+                            )
+                          else
+                            ...filteredEntries.map(
+                              (e) => _SubjectCard(
+                                subject: e.key,
+                                sections: e.value,
+                                onChanged: _refresh,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -248,7 +336,14 @@ class _NextUpCard extends StatelessWidget {
   final String subject;
   final String section;
   final String time;
-  const _NextUpCard({required this.subject, required this.section, required this.time});
+  final Future<void> Function()? onStart;
+
+  const _NextUpCard({
+    required this.subject,
+    required this.section,
+    required this.time,
+    this.onStart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +374,18 @@ class _NextUpCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Text(time, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(time, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: onStart,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Start next'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -377,13 +483,22 @@ class _SubjectCardState extends State<_SubjectCard> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () async {
+                                HapticFeedback.mediumImpact();
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                final verb = startLabel == 'Resume' ? 'Resuming' : 'Starting';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('$verb: ${widget.subject} — $sec'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
                                 final s = store.startOrResumeSession(widget.subject, sec);
                                 await Get.toNamed(AppRoutes.teacherLiveQr, arguments: {
                                   'subject': widget.subject,
                                   'section': sec,
                                   'sessionId': s.id,
                                 });
-                                await widget.onChanged();
+                                await widget.onChanged(); // refresh parent (updates Left Today & Next up)
                                 setState(() {});
                               },
                               icon: const Icon(Icons.play_circle_outline),
