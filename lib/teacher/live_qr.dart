@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../mock/store.dart';
@@ -27,7 +28,6 @@ class _LiveQrScreenState extends State<LiveQrScreen> {
   @override
   void initState() {
     super.initState();
-    // Ensure there is an active session and get its ID
     _sessionId = passedSessionId ?? store.startOrResumeSession(subject, section).id;
     _rotateAndSchedule();
   }
@@ -48,6 +48,28 @@ class _LiveQrScreenState extends State<LiveQrScreen> {
   void dispose() {
     _nextRotation?.cancel();
     super.dispose();
+  }
+
+  Future<void> _stopSession() async {
+    // Haptic + toast
+    HapticFeedback.mediumImpact();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Session ended: $subject — $section'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    // Stop rotation and close the session
+    _nextRotation?.cancel();
+    if (_sessionId != null) {
+      store.stopSession(_sessionId!);
+    }
+
+    // Small delay so the toast is visible before popping
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (mounted) Get.back();
   }
 
   @override
@@ -78,12 +100,7 @@ class _LiveQrScreenState extends State<LiveQrScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      if (_sessionId != null) {
-                        store.stopSession(_sessionId!);
-                      }
-                      Get.back();
-                    },
+                    onPressed: _stopSession,
                     icon: const Icon(Icons.stop_circle_outlined),
                     label: const Text('Stop Session'),
                   ),
