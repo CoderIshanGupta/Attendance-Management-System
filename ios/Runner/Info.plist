@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Required for camera scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>We use the camera to scan attendance QR codes.</string>
 </dict>
 </plist>
