@@ -15,7 +15,7 @@ import '../teacher/live_qr.dart';
 import '../teacher/attendees.dart';
 
 // Student
-import '../student/dashboard.dart';
+import '../student/shell.dart';
 
 // Shared
 import '../shared/profile.dart';
@@ -65,7 +65,11 @@ class AppRoutes {
     ),
 
     // Student
-    GetPage(name: studentHome, page: () => const StudentDashboard()),
+    GetPage(
+      name: studentHome,
+      page: () => const StudentShell(),
+      middlewares: [RoleMiddleware.student()],
+    ),
 
     // Shared
     GetPage(name: profile, page: () => const ProfileScreen()),
