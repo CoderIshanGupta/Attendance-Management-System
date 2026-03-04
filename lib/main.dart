@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/routes.dart';
+import 'shared/settings_store.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,27 +10,50 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  ThemeMode _toThemeMode(AppThemeMode m) {
+    switch (m) {
+      case AppThemeMode.system:
+        return ThemeMode.system;
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Attendance',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        navigationBarTheme: NavigationBarThemeData(
-          elevation: 3,
-          indicatorColor: Colors.deepPurple.withOpacity(0.12),
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
-            final selected = states.contains(MaterialState.selected);
-            return TextStyle(
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+    return ValueListenableBuilder<Settings>(
+      valueListenable: SettingsStore.I.settings,
+      builder: (context, s, _) {
+        return GetMaterialApp(
+          title: 'Attendance',
+          debugShowCheckedModeBanner: false,
+          themeMode: _toThemeMode(s.themeMode),
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          // Smooth theme transition
+          builder: (context, child) {
+            return AnimatedTheme(
+              data: Theme.of(context),
+              duration: const Duration(milliseconds: 320),
+              curve: Curves.easeInOutCubic,
+              child: child ?? const SizedBox.shrink(),
             );
-          }),
-        ),
-      ),
-      initialRoute: AppRoutes.splash,
-      getPages: AppRoutes.pages,
+          },
+          initialRoute: AppRoutes.splash,
+          getPages: AppRoutes.pages,
+        );
+      },
     );
   }
 }
